@@ -40,6 +40,24 @@ Unlike traditional ad blockers that rely solely on surface-level DOM hiding or n
 
 ---
 
+## 🛡️ Security Audit & Hardening (v1.0.0)
+
+BraveShield underwent a comprehensive defensive security audit and engineering hardening review prior to release:
+
+| Area | Security Hardening Applied |
+| :--- | :--- |
+| **UX & Playback Safety** | Automated state restoration for `video.playbackRate` and audio unmuted state in `player-guard.js`, preventing video from getting stuck at 16x speed or muted. |
+| **Origin Isolation** | `window.postMessage` calls restricted strictly to `window.location.origin` instead of wildcard `*` to eliminate third-party iframe snooping. |
+| **Message Validation** | Added origin checks and strict `ALLOWED_ACTIONS` whitelisting with numerical boundary enforcement (`1 <= count <= 1000`) in `content-bridge.js`. |
+| **Prototype Defense** | `deepPruneAds` ignores `__proto__`, `constructor`, and `prototype` keys to prevent prototype pollution attacks. |
+| **Cycle Immunity** | Recursive engine equipped with `WeakSet` visited-tracker to guarantee resilience against circular-reference DOS. |
+| **Trap Shielding** | Protected `Object.defineProperty` on `window` to prevent YouTube from unhooking player property traps. |
+| **Least Privilege** | Restricted `host_permissions` in `manifest.json` exclusively to `*://*.youtube.com/*`, minimizing attack surface. |
+
+*For complete details, see [CHANGELOG.md](CHANGELOG.md) and [SECURITY.md](SECURITY.md).*
+
+---
+
 ## 🏛️ Architecture Overview
 
 ```mermaid
@@ -120,6 +138,9 @@ braveshield-youtube-adblocker/
 │   ├── popup.css             # Brave dark-slate styling (#0f111a, #ff5500, #7357ff)
 │   └── popup.js              # Live telemetry updater, switches, and tab reload controller
 ├── icons/                    # Extension icons (16px, 32px, 48px, 128px)
+├── CHANGELOG.md              # Detailed release notes and security audit log
+├── SECURITY.md               # Security policy, threat model, and vulnerability reporting
+├── LICENSE                   # Open-source MIT license
 └── README.md                 # Project documentation
 ```
 

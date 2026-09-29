@@ -67,13 +67,18 @@
 
     batchTimer = setTimeout(() => {
       try {
+        const targetOrigin =
+          window.location.origin && window.location.origin !== 'null'
+            ? window.location.origin
+            : 'https://www.youtube.com';
+
         window.postMessage(
           {
             source: 'BRAVE_SHIELD_INTERCEPTOR',
             action: 'AD_PRUNED',
             count: prunedCounterBatch
           },
-          '*'
+          targetOrigin
         );
       } catch (err) {}
       prunedCounterBatch = 0;
@@ -108,10 +113,16 @@
     'unpluggedBlackoutsContext'
   ]);
 
-  function deepPruneAds(node, depth = 0) {
+  function deepPruneAds(node, depth = 0, visited = new WeakSet()) {
     if (!node || typeof node !== 'object' || depth > 25) {
       return 0;
     }
+
+    // Circular reference protection
+    if (visited.has(node)) {
+      return 0;
+    }
+    visited.add(node);
 
     let prunedCount = 0;
 
@@ -138,7 +149,7 @@
             node.splice(i, 1);
             prunedCount++;
           } else {
-            prunedCount += deepPruneAds(item, depth + 1);
+            prunedCount += deepPruneAds(item, depth + 1, visited);
           }
         }
       }
@@ -149,6 +160,11 @@
     const keys = Object.keys(node);
     for (let i = 0; i < keys.length; i++) {
       const key = keys[i];
+
+      // Prototype pollution defense
+      if (key === '__proto__' || key === 'constructor' || key === 'prototype') {
+        continue;
+      }
 
       if (AD_KEYS_TO_DELETE.has(key)) {
         try {
@@ -177,7 +193,7 @@
 
       const val = node[key];
       if (val && typeof val === 'object') {
-        prunedCount += deepPruneAds(val, depth + 1);
+        prunedCount += deepPruneAds(val, depth + 1, visited);
       }
     }
 
@@ -187,6 +203,8 @@
   /* ==========================================================================
      4. Property Traps: ytInitialPlayerResponse & ytInitialData
      ========================================================================== */
+  const trappedProperties = new Map();
+
   function setupPropertyTrap(propName) {
     try {
       let internalValue = window[propName];
@@ -196,9 +214,11 @@
         reportPrunedAds(pruned);
       }
 
+      trappedProperties.set(propName, internalValue);
+
       Object.defineProperty(window, propName, {
         get() {
-          return internalValue;
+          return trappedProperties.get(propName);
         },
         set(newValue) {
           try {
@@ -207,13 +227,12 @@
               reportPrunedAds(pruned);
             }
           } catch (e) {}
-          internalValue = newValue;
+          trappedProperties.set(propName, newValue);
         },
         configurable: true,
         enumerable: true
       });
     } catch (err) {
-      // Property might be non-configurable, fallback to direct mutation
       if (window[propName] && typeof window[propName] === 'object') {
         try {
           const pruned = deepPruneAds(window[propName]);
@@ -222,6 +241,25 @@
       }
     }
   }
+
+  // Hook Object.defineProperty on window to prevent YouTube from un-trapping
+  try {
+    const originalDefineProperty = Object.defineProperty;
+    const hookedDefineProperty = function (obj, prop, descriptor) {
+      if (obj === window && trappedProperties.has(prop) && descriptor) {
+        try {
+          if ('value' in descriptor && descriptor.value && typeof descriptor.value === 'object') {
+            deepPruneAds(descriptor.value);
+            trappedProperties.set(prop, descriptor.value);
+          }
+        } catch (e) {}
+        return obj;
+      }
+      return originalDefineProperty.apply(this, arguments);
+    };
+    makeNative(hookedDefineProperty, originalDefineProperty);
+    Object.defineProperty = hookedDefineProperty;
+  } catch (e) {}
 
   setupPropertyTrap('ytInitialPlayerResponse');
   setupPropertyTrap('ytInitialData');
@@ -309,6 +347,9 @@
 
       return originalFetch.apply(this, arguments).then(async (response) => {
         try {
+          if (!response || response.bodyUsed) {
+            return response;
+          }
           // Clone the response to sanitize payload
           const clone = response.clone();
           const rawText = await clone.text();

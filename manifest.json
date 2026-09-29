@@ -21,9 +21,7 @@
     "activeTab"
   ],
   "host_permissions": [
-    "*://*.youtube.com/*",
-    "*://*.googlevideo.com/*",
-    "*://*.doubleclick.net/*"
+    "*://*.youtube.com/*"
   ],
   "declarative_net_request": {
     "rule_resources": [

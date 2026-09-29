@@ -74,8 +74,24 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
   switch (message.type) {
     case 'RECORD_BLOCK': {
-      const incCount = typeof message.count === 'number' ? message.count : 1;
-      const category = message.category || 'AD_PRUNED';
+      const incCount =
+        typeof message.count === 'number' &&
+        Number.isFinite(message.count) &&
+        message.count > 0 &&
+        message.count <= 1000
+          ? Math.floor(message.count)
+          : 1;
+
+      const ALLOWED_CATEGORIES = new Set([
+        'AD_PRUNED',
+        'AD_SKIPPED',
+        'POPUP_DESTROYED',
+        'SHORTS_AD_SKIPPED',
+        'NETWORK_RULE'
+      ]);
+      const category = ALLOWED_CATEGORIES.has(message.category)
+        ? message.category
+        : 'AD_PRUNED';
 
       // Update per-tab in-memory counter
       if (tabId) {
@@ -122,7 +138,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     }
 
     case 'TOGGLE_RULES_ENGINE': {
-      const enabled = message.enabled;
+      const enabled = Boolean(message.enabled);
       if (chrome.declarativeNetRequest && chrome.declarativeNetRequest.updateEnabledRulesets) {
         chrome.declarativeNetRequest.updateEnabledRulesets({
           enableRulesetIds: enabled ? ['ruleset_1'] : [],

@@ -21,13 +21,18 @@
      ========================================================================== */
   function notifyBridge(action, count = 1) {
     try {
+      const targetOrigin =
+        window.location.origin && window.location.origin !== 'null'
+          ? window.location.origin
+          : 'https://www.youtube.com';
+
       window.postMessage(
         {
           source: 'BRAVE_SHIELD_INTERCEPTOR',
           action: action,
           count: count
         },
-        '*'
+        targetOrigin
       );
     } catch (e) {}
   }
@@ -245,6 +250,10 @@
   /* ==========================================================================
      6. High-Frequency Real-Time Player Heartbeat & MutationObserver
      ========================================================================== */
+  let isMitigatingAd = false;
+  let userPlaybackRate = 1.0;
+  let userMutedState = false;
+
   function runPlayerWatchdogCycle() {
     const player = document.getElementById('movie_player');
     const video = document.querySelector('video') || document.querySelector('#movie_player video');
@@ -255,10 +264,29 @@
         player.classList.contains('ad-showing') ||
         player.classList.contains('ad-interrupting');
 
-      const hasAdOverlay = document.querySelector('.ytp-ad-player-overlay');
+      const hasAdOverlay = Boolean(document.querySelector('.ytp-ad-player-overlay'));
 
       if (hasAdClass || hasAdOverlay) {
+        if (!isMitigatingAd) {
+          isMitigatingAd = true;
+          if (video) {
+            userPlaybackRate =
+              video.playbackRate && video.playbackRate < 16
+                ? video.playbackRate
+                : 1.0;
+            userMutedState = video.muted;
+          }
+        }
         triggerFastAdSkip(player, video);
+      } else if (isMitigatingAd) {
+        // Ad has finished: Restore user's normal playback rate and unmuted audio
+        isMitigatingAd = false;
+        if (video) {
+          video.playbackRate = userPlaybackRate || 1.0;
+          if (!userMutedState && video.muted) {
+            video.muted = false;
+          }
+        }
       }
     }
 

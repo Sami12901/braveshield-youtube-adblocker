@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Brave Shields - YouTube</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="shield-container">
+    <!-- Header -->
+    <header class="header">
+      <div class="logo-group">
+        <svg class="brave-shield-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="shieldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#ff7a00" />
+              <stop offset="50%" stop-color="#ff5500" />
+              <stop offset="100%" stop-color="#7357ff" />
+            </linearGradient>
+          </defs>
+          <path d="M12 2L3 6.5V11.5C3 17 6.8 21.7 12 23C17.2 21.7 21 17 21 11.5V6.5L12 2Z" fill="url(#shieldGrad)" />
+          <path d="M10 15.5L6.5 12L7.9 10.6L10 12.7L16.1 6.6L17.5 8L10 15.5Z" fill="#ffffff" />
+        </svg>
+        <div class="title-meta">
+          <h1 class="brand-title">BRAVE SHIELDS</h1>
+          <span class="site-label">youtube.com</span>
+        </div>
+      </div>
+      <div id="statusBadge" class="status-badge status-active">
+        <span class="status-dot"></span>
+        <span id="statusText">PROTECTED</span>
+      </div>
+    </header>
+
+    <!-- Master Shield Toggle Card -->
+    <div class="card master-card">
+      <div class="master-info">
+        <span class="master-label">Shields for this site</span>
+        <span class="master-sub">Advanced Anti-Adblock Defense</span>
+      </div>
+      <label class="switch master-switch">
+        <input type="checkbox" id="masterShieldToggle" checked>
+        <span class="slider round"></span>
+      </label>
+    </div>
+
+    <!-- Live Telemetry / Counters -->
+    <div class="card metrics-card">
+      <div class="hero-metric">
+        <div class="metric-number-wrapper">
+          <span id="totalBlockedCount" class="huge-number">0</span>
+        </div>
+        <span class="hero-metric-label">Total Ads & Trackers Blocked</span>
+      </div>
+
+      <div class="metric-divider"></div>
+
+      <div class="sub-metrics-grid">
+        <div class="sub-metric-box">
+          <span class="sub-metric-title">Scriptlet Pruned</span>
+          <span id="scriptletBlockedCount" class="sub-metric-number">0</span>
+          <span class="sub-metric-sub">Session: <span id="sessionBlockedCount">0</span></span>
+        </div>
+        <div class="sub-metric-box">
+          <span class="sub-metric-title">Network Blocked</span>
+          <span id="networkBlockedCount" class="sub-metric-number">0</span>
+          <span class="sub-metric-sub">DNR Engine Active</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Granular Controls -->
+    <div class="card controls-card">
+      <span class="section-title">SHIELD PROTECTIONS</span>
+      
+      <div class="control-row">
+        <div class="control-label-group">
+          <span class="control-title">Block Video Ads</span>
+          <span class="control-desc">Fast-forward, mute & auto-skip</span>
+        </div>
+        <label class="switch">
+          <input type="checkbox" id="toggleVideoAds" checked>
+          <span class="slider round"></span>
+        </label>
+      </div>
+
+      <div class="control-row">
+        <div class="control-label-group">
+          <span class="control-title">Block Feed & Banner Ads</span>
+          <span class="control-desc">Clean zero-gap grid layout</span>
+        </div>
+        <label class="switch">
+          <input type="checkbox" id="toggleFeedAds" checked>
+          <span class="slider round"></span>
+        </label>
+      </div>
+
+      <div class="control-row">
+        <div class="control-label-group">
+          <span class="control-title">Block Shorts Ads</span>
+          <span class="control-desc">Auto-skip sponsored reels</span>
+        </div>
+        <label class="switch">
+          <input type="checkbox" id="toggleShortsAds" checked>
+          <span class="slider round"></span>
+        </label>
+      </div>
+    </div>
+
+    <!-- Actions -->
+    <div class="action-card">
+      <button id="refreshBtn" class="refresh-button">
+        <svg class="refresh-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M23 4v6h-6"></path>
+          <path d="M1 20v-6h6"></path>
+          <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+        </svg>
+        <span>Quick Refresh YouTube</span>
+      </button>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <span class="footer-text">Brave-Native Engine Active &bull; Manifest V3</span>
+      <span class="footer-version">v1.0.0</span>
+    </footer>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>

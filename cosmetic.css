@@ -1,0 +1,76 @@
+/* ==========================================================================
+   BraveShield Cosmetic Filtering Engine
+   Seamless Ad Suppression & Grid Repair for YouTube (Manifest V3)
+   ========================================================================== */
+
+/* 1. Grid & Feed Slot Auto-Collapsing (eliminates empty whitespace/boxes) */
+ytd-rich-item-renderer:has(ytd-ad-slot-renderer),
+ytd-rich-item-renderer:has(ytd-in-feed-ad-layout-renderer),
+ytd-rich-item-renderer:has(ytd-promoted-sparkles-web-renderer),
+ytd-rich-item-renderer:has(ytd-promoted-video-renderer),
+ytd-rich-section-renderer:has(ytd-statement-banner-renderer),
+ytd-rich-section-renderer:has(ytd-banner-promo-renderer),
+ytd-rich-section-renderer:has(ytd-in-feed-ad-layout-renderer),
+ytd-rich-section-renderer:has(ytd-ad-slot-renderer),
+ytd-rich-grid-row #contents ytd-rich-item-renderer:has(ytd-ad-slot-renderer) {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+/* 2. Core Ad Renderers & In-Feed Slots */
+ytd-ad-slot-renderer,
+ytd-in-feed-ad-layout-renderer,
+ytd-banner-promo-renderer,
+ytd-statement-banner-renderer,
+ytd-promoted-sparkles-web-renderer,
+ytd-promoted-video-renderer,
+ytd-DisplayAdRenderer,
+ytd-companion-slot-renderer,
+ytd-compact-promoted-video-renderer,
+ytd-promoted-sparkles-text-search-renderer,
+ytd-search-pyv-renderer,
+ytd-action-companion-ad-renderer,
+.ytd-mealbar-promo-renderer,
+#masthead-ad,
+#player-ads,
+#panels:has(ytd-engagement-panel-section-list-renderer[target-id="engagement-panel-ads"]),
+ytd-engagement-panel-section-list-renderer[target-id="engagement-panel-ads"] {
+  display: none !important;
+}
+
+/* 3. In-Player Video Overlays & Ad Banners */
+.ytp-ad-overlay-container,
+.ytp-ad-overlay-slot,
+.ytp-ad-message-container,
+.ytp-ad-action-interrupter,
+.ytp-ad-progress-list,
+.ytp-ad-preview-container,
+.ytp-ad-player-overlay,
+.ytp-ad-player-overlay-flyout-cta,
+.ytp-ad-persistent-progress-bar-container,
+.ytp-ad-module {
+  display: none !important;
+}
+
+/* 4. YouTube Shorts Sponsored Ads */
+ytd-reel-player-overlay-renderer #promoted-sparkles-web-renderer,
+ytd-reel-player-overlay-renderer ytd-ad-slot-renderer,
+ytd-reel-video-renderer:has(ytd-ad-slot-renderer),
+ytd-reel-video-renderer:has(#promoted-sparkles-web-renderer) {
+  display: none !important;
+}
+
+/* 5. Anti-Adblock Enforcement Modals & Overlays */
+tp-yt-paper-dialog:has(ytd-enforcement-message-view-model),
+ytd-enforcement-message-view-model,
+.yt-playability-error-supported-renderers:has(ytd-enforcement-message-view-model) {
+  display: none !important;
+}
+
+/* Ensure backdrop does not freeze the screen when modal is blocked */
+tp-yt-iron-overlay-backdrop[opened]:has(~ * ytd-enforcement-message-view-model) {
+  display: none !important;
+}
